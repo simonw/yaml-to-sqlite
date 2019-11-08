@@ -10,7 +10,7 @@ import sqlite_utils
 )
 @click.argument("table", type=str)
 @click.argument("yaml_file", type=click.File())
-@click.option("--pk", type=str)
+@click.option("--pk", type=str, help="Column to use as a primary key")
 def cli(db_path, table, yaml_file, pk):
     "Covert YAML files to SQLite"
     db = sqlite_utils.Database(db_path)

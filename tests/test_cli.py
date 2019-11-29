@@ -1,6 +1,7 @@
 from click.testing import CliRunner
 from yaml_to_sqlite import cli
 import sqlite_utils
+import json
 
 
 TEST_YAML = """
@@ -8,13 +9,21 @@ TEST_YAML = """
   url: https://github.com/simonw/datasette-cluster-map
 - name: datasette-vega
   url: https://github.com/simonw/datasette-vega
+  nested_with_date:
+  - title: Hello
+    date: 2010-01-01
 """
 EXPECTED = [
     {
         "name": "datasette-cluster-map",
         "url": "https://github.com/simonw/datasette-cluster-map",
+        "nested_with_date": None,
     },
-    {"name": "datasette-vega", "url": "https://github.com/simonw/datasette-vega"},
+    {
+        "name": "datasette-vega",
+        "url": "https://github.com/simonw/datasette-vega",
+        "nested_with_date": json.dumps([{"title": "Hello", "date": "2010-01-01"}]),
+    },
 ]
 
 

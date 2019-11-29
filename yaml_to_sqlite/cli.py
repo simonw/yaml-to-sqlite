@@ -1,6 +1,7 @@
 import click
 import yaml
 import sqlite_utils
+import json
 
 
 @click.command()
@@ -14,4 +15,8 @@ import sqlite_utils
 def cli(db_path, table, yaml_file, pk):
     "Covert YAML files to SQLite"
     db = sqlite_utils.Database(db_path)
-    db[table].upsert_all(yaml.safe_load(yaml_file), pk=pk)
+    docs = yaml.safe_load(yaml_file)
+    # We round-trip the docs to JSON to ensure anything unexpected
+    # like date objects is converted to valid JSON values
+    docs = json.loads(json.dumps(docs, default=str))
+    db[table].upsert_all(docs, pk=pk)

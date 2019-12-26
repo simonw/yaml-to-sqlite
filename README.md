@@ -7,7 +7,7 @@
 $ yaml-to-sqlite --help
 Usage: yaml-to-sqlite [OPTIONS] DB_PATH TABLE YAML_FILE
 
-  Covert YAML files to SQLite
+  Convert YAML files to SQLite
 
 Options:
   --version  Show the version and exit.

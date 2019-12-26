@@ -13,7 +13,7 @@ import json
 @click.argument("yaml_file", type=click.File())
 @click.option("--pk", type=str, help="Column to use as a primary key")
 def cli(db_path, table, yaml_file, pk):
-    "Covert YAML files to SQLite"
+    "Convert YAML files to SQLite"
     db = sqlite_utils.Database(db_path)
     docs = yaml.safe_load(yaml_file)
     # We round-trip the docs to JSON to ensure anything unexpected

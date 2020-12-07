@@ -19,4 +19,7 @@ def cli(db_path, table, yaml_file, pk):
     # We round-trip the docs to JSON to ensure anything unexpected
     # like date objects is converted to valid JSON values
     docs = json.loads(json.dumps(docs, default=str))
-    db[table].upsert_all(docs, pk=pk)
+    if pk:
+        db[table].upsert_all(docs, pk=pk)
+    else:
+        db[table].insert_all(docs)

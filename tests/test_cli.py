@@ -55,3 +55,22 @@ def test_with_pk(tmpdir):
     # Run it again should get same number of rows
     CliRunner().invoke(cli.cli, [str(db_path), "items", "-"], input=TEST_YAML)
     assert EXPECTED == list(db["items"].rows)
+
+
+def test_single_column(tmpdir):
+    db_path = tmpdir / "db.db"
+    test_yaml = "- One\n" "- Two\n" "- Three\n"
+    assert (
+        0
+        == CliRunner()
+        .invoke(
+            cli.cli,
+            [str(db_path), "numbers", "-", "--single-column", "name"],
+            input=test_yaml,
+        )
+        .exit_code
+    )
+    db = sqlite_utils.Database(str(db_path))
+    actual = list(db["numbers"].rows)
+    assert actual == [{"name": "One"}, {"name": "Two"}, {"name": "Three"}]
+    assert db["numbers"].pks == ["name"]

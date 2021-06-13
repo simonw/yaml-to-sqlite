@@ -22,7 +22,7 @@ setup(
     version=VERSION,
     license="Apache License, Version 2.0",
     packages=find_packages(),
-    install_requires=["click", "PyYAML", "sqlite-utils"],
+    install_requires=["click", "PyYAML", "sqlite-utils>=3.9.1"],
     setup_requires=["pytest-runner"],
     extras_require={"test": ["pytest"]},
     entry_points="""

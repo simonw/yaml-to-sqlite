@@ -2,6 +2,7 @@ from click.testing import CliRunner
 from yaml_to_sqlite import cli
 import sqlite_utils
 import json
+import textwrap
 
 
 TEST_YAML = """
@@ -74,3 +75,32 @@ def test_single_column(tmpdir):
     actual = list(db["numbers"].rows)
     assert actual == [{"name": "One"}, {"name": "Two"}, {"name": "Three"}]
     assert db["numbers"].pks == ["name"]
+
+
+def test_alters_if_necessary(tmpdir):
+    db_path = tmpdir / "db.db"
+    assert (
+        0
+        == CliRunner()
+        .invoke(cli.cli, [str(db_path), "items", "-"], input=TEST_YAML)
+        .exit_code
+    )
+    more_input = textwrap.dedent(
+        """
+    - name: some-other-thing
+      new_column: A new column
+    """
+    )
+    assert (
+        0
+        == CliRunner()
+        .invoke(cli.cli, [str(db_path), "items", "-"], input=more_input)
+        .exit_code
+    )
+    db = sqlite_utils.Database(str(db_path))
+    assert db["items"].columns_dict == {
+        "name": str,
+        "url": str,
+        "nested_with_date": str,
+        "new_column": str,
+    }

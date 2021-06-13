@@ -32,6 +32,6 @@ def cli(db_path, table, yaml_file, pk, single_column):
     # like date objects is converted to valid JSON values
     docs = json.loads(json.dumps(docs, default=str))
     if pk:
-        db[table].upsert_all(docs, pk=pk)
+        db[table].upsert_all(docs, pk=pk, alter=True)
     else:
-        db[table].insert_all(docs)
+        db[table].insert_all(docs, alter=True)

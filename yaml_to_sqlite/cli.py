@@ -11,7 +11,7 @@ import json
 )
 @click.argument("table", type=str)
 @click.argument("yaml_file", type=click.File())
-@click.option("--pk", type=str, help="Column to use as a primary key")
+@click.option("--pk", type=str, help="Column to use as a primary key. Set to 'auto-id' for inserting 'id' column")
 @click.option(
     "--single-column",
     type=str,
@@ -31,7 +31,13 @@ def cli(db_path, table, yaml_file, pk, single_column):
     # We round-trip the docs to JSON to ensure anything unexpected
     # like date objects is converted to valid JSON values
     docs = json.loads(json.dumps(docs, default=str))
-    if pk:
+    if pk and pk != 'auto-id':
         db[table].upsert_all(docs, pk=pk, alter=True)
+    elif pk == 'auto-id':
+        _id = 1
+        for i, _doc in enumerate(docs):
+            docs[i] = {'id': _id, **_doc}
+            _id += 1
+        db[table].upsert_all(docs, pk='id', alter=True)
     else:
         db[table].insert_all(docs, alter=True)

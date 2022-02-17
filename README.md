@@ -15,7 +15,7 @@ Usage: yaml-to-sqlite [OPTIONS] DB_PATH TABLE YAML_FILE
 
 Options:
   --version             Show the version and exit.
-  --pk TEXT             Column to use as a primary key
+  --pk TEXT             Column to use as a primary key. Set to 'auto-id' for adding an auto-incrementing 'id' column
   --single-column TEXT  If YAML file is a list of values, populate this column
   --help                Show this message and exit.
 ```
@@ -52,6 +52,17 @@ CREATE TABLE [stories] (
    [body] TEXT
 );
 ```
+
+The `--pk` option can be used to auto-set the primary key for the table:
+```bash
+$ sqlite-utils schema news.db
+CREATE TABLE [stories] (
+   [ID]   INTEGER PRIMARY KEY
+   [date] TEXT,
+   [body] TEXT
+);
+```
+
 ## Single column YAML lists
 
 The `--single-column` option can be used when the YAML file is a list of values, for example a file called `dogs.yml` containing the following:

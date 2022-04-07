@@ -19,12 +19,13 @@ import json
     help="If YAML file is a list of values, populate this column",
 )
 @click.option("--loaddata", type=bool, help="Restore from a dump data file YAML Django")
+@click.option("--exclude", type=str, help="Prevents specific models, you can use name1, name2, name3")
 @click.option(
     "--legacy-table",
     type=str,
     help="Set legacy table name, for not created tables with name app_table, you can use name1, name2, name3"
 )
-def cli(db_path, table, yaml_file, pk, pk_legacy, single_column, loaddata, legacy_table):
+def cli(db_path, table, yaml_file, pk, pk_legacy, single_column, loaddata, legacy_table, exclude):
     "Convert YAML files to SQLite"
     db = sqlite_utils.Database(db_path)
     docs = yaml.safe_load(yaml_file)
@@ -40,7 +41,13 @@ def cli(db_path, table, yaml_file, pk, pk_legacy, single_column, loaddata, legac
     docs = json.loads(json.dumps(docs, default=str))
     if loaddata:
         # its recomendate for djanto test when you need data, but you use pipeline and need create new database
+        print(exclude)
+        if exclude:
+            exclude = exclude.split(",")
+
         for table in docs:
+            if table['model'].split()[-1] in exclude:
+                continue
             table['fields'][pk if pk else 'id'] = table['pk']
             for field in table['fields']:
                 try:
@@ -59,3 +66,6 @@ def cli(db_path, table, yaml_file, pk, pk_legacy, single_column, loaddata, legac
         db[table].upsert_all(docs, pk=pk, alter=True)
     else:
         db[table].insert_all(docs, alter=True)
+
+
+cli()

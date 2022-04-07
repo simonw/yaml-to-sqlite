@@ -12,6 +12,7 @@ import json
 @click.argument("table", type=str)
 @click.argument("yaml_file", type=click.File())
 @click.option("--pk", type=str, help="Column to use as a primary key")
+@click.option("--pk-legacy", type=str, help="Column to use as a primary key legacy tables")
 @click.option(
     "--single-column",
     type=str,
@@ -23,7 +24,7 @@ import json
     type=str,
     help="Set legacy table name, for not created tables with name app_table, you can use name1, name2, name3"
 )
-def cli(db_path, table, yaml_file, pk, single_column, loaddata, legacy_table):
+def cli(db_path, table, yaml_file, pk, pk_legacy, single_column, loaddata, legacy_table):
     "Convert YAML files to SQLite"
     db = sqlite_utils.Database(db_path)
     docs = yaml.safe_load(yaml_file)
@@ -49,7 +50,7 @@ def cli(db_path, table, yaml_file, pk, single_column, loaddata, legacy_table):
             if legacy_table:
                 for legacy in legacy_table.split(','):
                     if legacy == table['model'].split('.')[0]:
-                        db[table['model'].split('.')[-1]].upsert(table['fields'], pk=pk if pk else 'id')
+                        db[table['model'].split('.')[-1]].upsert(table['fields'], pk=pk_legacy if pk_legacy else 'id')
                     else:
                         db[table['model'].replace('.', '_')].upsert(table['fields'], pk=pk if pk else 'id')
             else:

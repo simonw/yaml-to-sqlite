@@ -35,8 +35,8 @@ def cli(db_path, table, yaml_file, pk, single_column, loaddata):
     if loaddata:
         # its recomendate for djanto test when you need data, but you use pipeline and need create new database
         for table in docs:
-            table['fields']['id'] = table['pk']
-            db[table['model'].split('.')[-1]].insert(table['fields'], pk='id')
+            table['fields'][pk if pk else 'id'] = table['pk']
+            db[table['model'].split('.')[-1]].upsert(table['fields'], pk=pk if pk else 'id')
     elif pk:
         db[table].upsert_all(docs, pk=pk, alter=True)
     else:

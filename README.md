@@ -17,6 +17,7 @@ Options:
   --version             Show the version and exit.
   --pk TEXT             Column to use as a primary key
   --single-column TEXT  If YAML file is a list of values, populate this column
+  --loaddata            Create struct and insert values by django-admin dumpdata --format=YAML.
   --help                Show this message and exit.
 ```
 ## Usage
@@ -78,4 +79,18 @@ name
 Cleo
 Pancakes
 Nixie
+```
+
+## Restore django-admin dumpdata
+
+```yaml
+-   model: pet.Dogs
+    pk: 1
+    fields:
+        name: Totó
+        age: 6
+```
+
+```bash
+$ yaml-to-sqlite dogs.db dogs.yaml --loaddata=true
 ```

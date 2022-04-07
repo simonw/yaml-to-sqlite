@@ -17,7 +17,8 @@ import json
     type=str,
     help="If YAML file is a list of values, populate this column",
 )
-def cli(db_path, table, yaml_file, pk, single_column):
+@click.option("--loaddata", type=bool, help="Restore from a dump data file YAML Django")
+def cli(db_path, table, yaml_file, pk, single_column, loaddata):
     "Convert YAML files to SQLite"
     db = sqlite_utils.Database(db_path)
     docs = yaml.safe_load(yaml_file)
@@ -31,7 +32,12 @@ def cli(db_path, table, yaml_file, pk, single_column):
     # We round-trip the docs to JSON to ensure anything unexpected
     # like date objects is converted to valid JSON values
     docs = json.loads(json.dumps(docs, default=str))
-    if pk:
+    if loaddata:
+        # its recomendate for djanto test when you need data, but you use pipeline and need create new database
+        for table in docs:
+            table['fields']['id'] = table['pk']
+            db[table['model'].split('.')[-1]].insert(table['fields'], pk='id')
+    elif pk:
         db[table].upsert_all(docs, pk=pk, alter=True)
     else:
         db[table].insert_all(docs, alter=True)

@@ -44,7 +44,6 @@ def cli(db_path, table, yaml_file, pk, pk_legacy, single_column, loaddata, legac
         for table in docs:
             if exclude:
                 if table['model'].split('.')[-1] in exclude.split(","):
-                    print(table['model'].split()[-1], exclude.split(","))
                     continue
             table['fields'][pk if pk else 'id'] = table['pk']
             for field in table['fields']:

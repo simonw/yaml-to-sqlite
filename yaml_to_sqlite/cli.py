@@ -18,7 +18,12 @@ import json
     help="If YAML file is a list of values, populate this column",
 )
 @click.option("--loaddata", type=bool, help="Restore from a dump data file YAML Django")
-def cli(db_path, table, yaml_file, pk, single_column, loaddata):
+@click.option(
+    "--legacy-table",
+    type=str,
+    help="Set legacy table name, for not created tables with name app_table, you can use name1, name2, name3"
+)
+def cli(db_path, table, yaml_file, pk, single_column, loaddata, legacy_table):
     "Convert YAML files to SQLite"
     db = sqlite_utils.Database(db_path)
     docs = yaml.safe_load(yaml_file)
@@ -41,7 +46,14 @@ def cli(db_path, table, yaml_file, pk, single_column, loaddata):
                     table['fields'][field] = float(table['fields'][field])
                 except:
                     continue
-            db[table['model'].split('.')[-1]].upsert(table['fields'], pk=pk if pk else 'id')
+            if legacy_table:
+                for legacy in legacy_table.split(','):
+                    if legacy == table['model'].split('.')[0]:
+                        db[table['model'].split('.')[-1]].upsert(table['fields'], pk=pk if pk else 'id')
+                    else:
+                        db[table['model'].replace('.', '_')].upsert(table['fields'], pk=pk if pk else 'id')
+            else:
+                db[table['model'].replace('.', '_')].upsert(table['fields'], pk=pk if pk else 'id')
     elif pk:
         db[table].upsert_all(docs, pk=pk, alter=True)
     else:

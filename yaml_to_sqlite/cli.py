@@ -41,13 +41,10 @@ def cli(db_path, table, yaml_file, pk, pk_legacy, single_column, loaddata, legac
     docs = json.loads(json.dumps(docs, default=str))
     if loaddata:
         # its recomendate for djanto test when you need data, but you use pipeline and need create new database
-        print(exclude)
-        if exclude:
-            exclude = exclude.split(",")
-
         for table in docs:
-            if table['model'].split()[-1] in exclude:
-                continue
+            if exclude:
+                if table['model'].split()[-1] in exclude.split(","):
+                    continue
             table['fields'][pk if pk else 'id'] = table['pk']
             for field in table['fields']:
                 try:
@@ -66,6 +63,3 @@ def cli(db_path, table, yaml_file, pk, pk_legacy, single_column, loaddata, legac
         db[table].upsert_all(docs, pk=pk, alter=True)
     else:
         db[table].insert_all(docs, alter=True)
-
-
-cli()

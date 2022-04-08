@@ -1,3 +1,5 @@
+import sqlite3
+
 import click
 import yaml
 import sqlite_utils
@@ -45,18 +47,35 @@ def cli(db_path, table, yaml_file, pk, pk_legacy, single_column, loaddata, legac
             if exclude:
                 if table['model'].split('.')[-1] in exclude.split(","):
                     continue
-            table['fields'][pk if pk else 'id'] = table['pk']
             for field in table['fields']:
                 try:
-                    table['fields'][field] = float(table['fields'][field])
+                    if table['fields'][field].replace('.', '').isdigit():
+                        table['fields'][field] = float(table['fields'][field])
                 except:
                     continue
             if legacy_table:
                 for legacy in legacy_table.split(','):
                     if legacy == table['model'].split('.')[0]:
+                        table['fields'][pk_legacy if pk_legacy else 'id'] = table['pk']
                         db[table['model'].split('.')[-1]].upsert(table['fields'], pk=pk_legacy if pk_legacy else 'id')
                     else:
-                        db[table['model'].replace('.', '_')].upsert(table['fields'], pk=pk if pk else 'id')
+                        table['fields'][pk if pk else 'id'] = table['pk']
+                        while True:
+                            try:
+                                db[table['model'].replace('.', '_')].insert(table['fields'], pk=pk if pk else 'id')
+                                break
+                            except sqlite3.OperationalError as e:
+                                column = str(e).split()[-1].strip()
+                                if type(table['fields'][column]) == list:
+                                    table['fields'].pop(column)
+                                else:
+                                    table['fields'][f"{column}_id"] = table['fields'][column]
+                                    table['fields'].pop(column)
+                                try:
+                                    db[table['model'].replace('.', '_')].insert(table['fields'], pk=pk if pk else 'id')
+                                    break
+                                except sqlite3.OperationalError:
+                                    pass
             else:
                 db[table['model'].replace('.', '_')].upsert(table['fields'], pk=pk if pk else 'id')
     elif pk:
